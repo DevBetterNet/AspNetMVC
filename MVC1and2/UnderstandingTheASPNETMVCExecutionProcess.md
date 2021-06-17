@@ -2,21 +2,75 @@
 
 ![](assets/MVC-request-life-cycle-pipeline.jpg)
 
-The following lists the stages of execution for an MVC Web project:
+Mô tả hoạt động
 
-- Receive first request for the application
-  - In the Global.asax file, **Route** objects are added to the **RouteTable** object.
-- Perform routing
-  - The **UrlRoutingModule** module uses the first matching **Route** object in the **RouteTable** collection to create the **RouteData** object, which it then uses to create a **RequestContext** (**IHttpContext**) object.
-- Create MVC request handler
-  - The **MvcRouteHandler** object creates an instance of the **MvcHandler** class and passes it the **RequestContext** instance.
-- Create controller
-  - The **MvcHandler** object uses the **RequestContext** instance to identify the **IControllerFactory** object (typically an instance of the **DefaultControllerFactory** class) to create the controller instance with.
-- Execute controller - The **MvcHandler** instance calls the controller s **Execute** method. |
-- Invoke action
-  - Most controllers inherit from the **Controller** base class. For controllers that do so, the **ControllerActionInvoker** object that is associated with the controller determines which action method of the controller class to call, and then calls that method.
-- Execute result
-  - A typical action method might receive user input, prepare the appropriate response data, and then execute the result by returning a result type. The built-in result types that can be executed include the following: **ViewResult** (which renders a view and is the most-often used result type), **RedirectToRouteResult**, **RedirectResult**, **ContentResult**, **JsonResult**, and **EmptyResult**.
+**Request** 
+
+​	Chỉ với request lần đầu tiên, MVC Application sẽ chạy file Global.asasx (Global.asax.cs code behind file). Mục đích để khai báo cho ứng nhưng bị các *Route* cần cấu hình vào *RouteTable*.. Request từ lần thứ 2 trở đi sẽ chuyển qua bước tiếp theo. 
+
+*Tham khảo*: 
+
+Global.asax: https://docs.microsoft.com/en-us/dotnet/api/system.web.httpapplication?view=netframework-4.8
+
+Route: https://docs.microsoft.com/en-us/dotnet/api/system.web.routing.route?view=netframework-4.8
+
+RouteTable: https://docs.microsoft.com/en-us/dotnet/api/system.web.routing.routetable?view=netframework-4.8
+
+**Routing**
+
+   Mục đích sẽ tìm URL request có map với Route nào đã được khai báo ở Global.asax không ? Nếu thấy sẽ lấy cái Route đầu tiên để tạo *RequestContext*. Nếu không tìm thấy sẽ báo lỗi 404.
+
+*Thảm khảo*
+
+UrlRoutingModule:  https://docs.microsoft.com/en-us/dotnet/api/system.web.routing.urlroutingmodule?view=netframework-4.8
+
+RequestContext: https://docs.microsoft.com/en-us/dotnet/api/system.web.routing.requestcontext?view=netframework-4.8
+
+
+
+**MVC Handler**
+
+Sẽ chọn controller để xử lý Request bằng cách tạo một đối tượng **MvcHandler** với constructor parameter chính là **RequestContext**. 
+
+Tham khảo: https://docs.microsoft.com/en-us/dotnet/api/system.web.mvc.mvchandler?view=aspnet-mvc-5.2
+
+
+
+**Controller**
+
+Tạo controller: lấy thông tin từ thuộc tính MvcHandler.RequestContext để tạo controller instance.
+
+Execute controller: sẽ gọi tới hàm Execute() này [ControllerBase Class (System.Web.Mvc) | Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/api/system.web.mvc.controllerbase?view=aspnet-mvc-5.2). Đây là abstract class, sẽ gọi từ những controller mà khi phát triển ứng dụng chúng ta đã tạo.
+
+Invoke action: ASP.NET MVC đã kết hợp ControllerActionInvoker vào Controller Base cho hầu hết các Controllers.
+
+*Tham khảo*
+
+DefaultControllerFactory: https://docs.microsoft.com/en-us/dotnet/api/system.web.mvc.defaultcontrollerfactory?view=aspnet-mvc-5.2
+
+
+
+**Action Executed**
+
+Bước này sẽ trả kết quả về cho Views thông qua một class là System.Web.Mvc.ActionResult. Ta hay gọi đây là các Result Types. 
+
+System.Web.Mvc.ContentResult: Trả về trực tiếp giá trị.
+System.Web.Mvc.EmptyResult: Nội dung trống
+System.Web.Mvc.FileResult: Trả về file dữ liệu
+System.Web.Mvc.HttpStatusCodeResult: Trả về HTTPStatusCode, đầu 2xxx thành công, 3xxx quyền, 4xxx lỗi phía frontend, 5xx lỗi phía backend
+System.Web.Mvc.JavaScriptResult: Trả về javascript code: 
+System.Web.Mvc.JsonResult: Trả về json data
+System.Web.Mvc.RedirectResult: Có thể redirect tới URL khác
+System.Web.Mvc.RedirectToRouteResult: Chuyển qua controller.action khác.
+System.Web.Mvc.ViewResultBase  : kết hợp với View template file.
+
+Tham khảo: [ActionResult Class (System.Web.Mvc) | Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/api/system.web.mvc.actionresult?view=aspnet-mvc-5.2)
+
+
+
+
+
+------------------------------------------
 
 
 
